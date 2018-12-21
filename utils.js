@@ -39,8 +39,12 @@ const restaurants = [
 */
 
 module.exports.connectDB = () => {
-  const db = mongoose.connect('mongodb://127.0.0.1:27017/restaurant');
+  if (process.env.NODE_ENV === 'production')
+    const db_url = process.env.MONGODB_URI;
+  else
+    const db_url = 'mongodb://127.0.0.1:27017/restaurant';
 
+  const db = mongoose.connect(db_url);
   const RestaurantSchema = new mongoose.Schema({
     name: { type: String, required: true },
     placeId: String,
