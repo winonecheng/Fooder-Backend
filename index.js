@@ -21,6 +21,7 @@ const server = new ApolloServer({
       apiKey: 'AIzaSyA1ug3pDy-rR6btRx88y-K9znjzRTUeHIE',
     };
   },
+  introspection: true,
 });
 
 server.listen({ port: process.env.PORT || 5000 }).then(({ url }) => {
