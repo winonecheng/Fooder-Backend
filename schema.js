@@ -25,19 +25,20 @@ const typeDefs = gql`
     name: String
     placeId: String
     rating: Float
-    priceLevel: Int
+    priceLevel: String
     phoneNumber: String
     tags: [Tag]
     location: Location
     reviews: [Review]
     photoUrls: [String]
     isOpenNow: Boolean
+    openingHours: [String]
   }
 
   type Query {
     tags: [Tag]
-    restaurants: [Restaurant]
-    searchRestaurants(tagIds: [ID]): [Restaurant]
+    restaurants(first: Int): [Restaurant]
+    searchRestaurants(tagIds: [ID], first: Int): [Restaurant]
     getRestaurantByPlaceId(placeId: String): Restaurant
   }
 `;

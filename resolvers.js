@@ -1,9 +1,9 @@
 const resolvers = {
   Query: {
     tags: async (_, __, { dataSources }) => dataSources.placeAPI.getTags(),
-    restaurants: async (_, __, { dataSources }) => dataSources.placeAPI.getRestaurants(),
-    searchRestaurants: (_, { tagIds }, { dataSources }) => dataSources.placeAPI.searchRestaurants(tagIds),
-    getRestaurantByPlaceId: (_, { placeId }, { dataSources }) => dataSources.placeAPI.getRestaurant(placeId),
+    restaurants: async (_, { first=10 }, { dataSources }) => dataSources.placeAPI.getRestaurants(first),
+    searchRestaurants: async (_, { tagIds, first=10 }, { dataSources }) => dataSources.placeAPI.searchRestaurants(tagIds, first),
+    getRestaurantByPlaceId: async (_, { placeId }, { dataSources }) => dataSources.placeAPI.getRestaurant(placeId),
   },
   Restaurant: {
     reviews: async (r, _, { dataSources }) => dataSources.placeAPI.getReviews(r.placeId),

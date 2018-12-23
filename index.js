@@ -15,13 +15,25 @@ const dataSources = () => ({
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  engine: {
+    apiKey: "service:fooder-backend:BS33OMfO-W-cSUqzKtQXjw",
+  },
   dataSources,
   context: () => {
     return {
       apiKey: 'AIzaSyA1ug3pDy-rR6btRx88y-K9znjzRTUeHIE',
     };
   },
+
   introspection: true,
+  formatError: error => {
+    console.log(error);
+    return error;
+  },
+  formatResponse: response => {
+    console.log(response);
+    return response;
+  },
 });
 
 server.listen({ port: process.env.PORT || 5000 }).then(({ url }) => {
