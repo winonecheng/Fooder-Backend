@@ -3,7 +3,7 @@ const restaurantData = require('./restaurant_data.json')
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
-const db = mongoose.connect('mongodb://127.0.0.1:27017/restaurant');
+const db = mongoose.connect('mongodb://127.0.0.1:27017/restaurant', { useNewUrlParser: true });
 
 const RestaurantSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -19,6 +19,7 @@ const RestaurantSchema = new mongoose.Schema({
   occasions: [{ type: 'ObjectId', ref: 'Tag' }],
   tags: [{ type: 'ObjectId', ref: 'Tag' }],
   openingHours: [String],
+  reviewCount: Number,
 });
 
 const TagSchema = new mongoose.Schema({
@@ -42,11 +43,15 @@ async function retrieveTags() {
   return tags;
 }
 
+function formatPrice(priceText) {
+  const priceSymbol = { '$': 100, '$$': 200, '$$$': 300, '$$$$': 400 };
+  var result = priceText.replace(/\$+/g, m => priceSymbol[m]);
+  return result.includes('-') ? result : (parseInt(result) - 100).toString().concat('-', result);
+}
+
 function insertRestaurant(tags) {
   restaurantData.forEach(r => {
-    if (r.price == '' || r.geometry === '') {
-      return;
-    }
+    if (r.price == '' || r.geometry === '') return;
 
     var occasion = r.occasion.split("/").filter(Boolean);
     var cuisine = r.cuisine.split("/");
@@ -56,7 +61,7 @@ function insertRestaurant(tags) {
       name: r.name,
       placeId: r.place_id,
       rating: r.rating,
-      priceLevel: r.price,
+      priceLevel: formatPrice(r.price),
       phoneNumber: r.formatted_phone_number,
       location: {
         lat: JSON.parse(r.geometry.replace(/'/g, '"')).location.lat,
@@ -67,6 +72,7 @@ function insertRestaurant(tags) {
       tags: feature.map(f => ObjectId(tags.find(_tag => _tag.text === f)._id)),
       openingHours: r.opening_hours === '' ? [''] :
         JSON.parse(r.opening_hours.replace(/'/g, '"')).weekday_text,
+      reviewCount: r.reviewCount || 0,
     };
 
     restaurant.create(r, function (err, docs) {
@@ -80,8 +86,6 @@ async function main() {
   var tags = await retrieveTags();
   insertRestaurant(tags);
 }
-
-// main();
 
 function countFreq() {
   var count = {}
@@ -108,4 +112,24 @@ function countFreq() {
   console.log(sortable);
 }
 
-countFreq();
+async function getReviews(mapsUrl) {
+  const fetch = require("node-fetch");
+  return await fetch(mapsUrl)
+    .then(res => res.text())
+    .then(body => body.match(/(\d+) 篇評論/))
+    .catch(err => console.error(err));
+}
+
+async function reviewsNumberCrawler() {
+  await Promise.all(restaurantData.map(async (r, idx, _arr) => {
+    if (r.url === '' || r.reviewCount !== undefined ) return;
+    var reviewMatch = await getReviews(r.url.replace('https', 'http'));
+    if (reviewMatch) {
+      _arr[idx]['reviewCount'] = reviewMatch[1]
+      console.log(_arr[idx].index);
+    }
+  }));
+
+  const fs = require('fs');
+  fs.writeFile('./restaurant_data.json', JSON.stringify(restaurantData), 'utf8', function () { console.log('success!'); });
+}

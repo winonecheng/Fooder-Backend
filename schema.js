@@ -30,6 +30,7 @@ const typeDefs = gql`
     tags: [Tag]
     location: Location
     reviews: [Review]
+    reviewCount: Int
     photoUrls: [String]
     isOpenNow: Boolean
     openingHours: [String]

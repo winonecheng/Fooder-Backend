@@ -21,7 +21,7 @@ const server = new ApolloServer({
   dataSources,
   context: () => {
     return {
-      apiKey: 'AIzaSyA1ug3pDy-rR6btRx88y-K9znjzRTUeHIE',
+      apiKey: 'AIzaSyAglSfq8l-Ko6eK1s-IRFe3H0ib2tGA_f8',
     };
   },
 

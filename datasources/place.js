@@ -48,8 +48,8 @@ class PlaceAPI extends RESTDataSource {
 
     return photos ?
       await Promise.all(photos.map(async photo => await fetch(
-          `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`
-        ).then(res => res.url)
+        `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`
+      ).then(res => res.url)
       )) : [];
   }
 
@@ -66,16 +66,32 @@ class PlaceAPI extends RESTDataSource {
   }
 
   async searchRestaurants(tagIds, first) {
-    return await this.db.restaurant.find({
-      occasions: tagIds[0],
-      tags: { $in: tagIds.slice(1) },
-    }).sort('-rating').limit(first).populate('tags');
-    // tagIds = tagIds.map(tagId => o)
-    // const r = await this.db.restaurant.aggregate([
-    //   { $match: { "tags._id": { $in: tagIds } } },
-    //   // { $addFields: { 'numSameTag': {$size: { "$setIntersection": ["$tags._id", tagIds] }} }},
-    // ]);
-    // console.log(r)
+    const ObjectId = require('mongoose').Types.ObjectId;
+    tagIds = tagIds.map(tagId => ObjectId(tagId));
+
+    const r = await this.db.restaurant.aggregate(
+      [
+        {
+          $match: {
+            occasions: tagIds[0],
+            tags: { $in: tagIds.slice(1) },
+          }
+        },
+        {
+          $addFields: {
+            'commonTagCount': {
+              $size: {
+                $setIntersection: ['$tags', tagIds.slice(1)]
+              }
+            }
+          }
+        },
+        { $sort: { 'commonTagCount': -1 , 'rating': -1} },
+        { $limit: first },
+      ]
+    );
+
+    return await this.db.tag.populate(r, { path: 'tags' });
   }
 }
 

@@ -20,6 +20,7 @@ module.exports.connectDB = () => {
     occasions: [{ type: 'ObjectId', ref: 'Tag' }],
     tags: [{ type: 'ObjectId', ref: 'Tag' }],
     openingHours: [String],
+    reviewCount: Number,
   });
 
   const TagSchema = new mongoose.Schema({
