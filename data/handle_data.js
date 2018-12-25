@@ -3,7 +3,10 @@ const restaurantData = require('./restaurant_data.json')
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
-const db = mongoose.connect('mongodb://127.0.0.1:27017/restaurant', { useNewUrlParser: true });
+const db_url = process.env.NODE_ENV === 'production' ?
+  process.env.MONGODB_URI :
+  'mongodb://127.0.0.1:27017/restaurant'
+const db = mongoose.connect(db_url, { useNewUrlParser: true });
 
 const RestaurantSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -133,3 +136,5 @@ async function reviewsNumberCrawler() {
   const fs = require('fs');
   fs.writeFile('./restaurant_data.json', JSON.stringify(restaurantData), 'utf8', function () { console.log('success!'); });
 }
+
+main();
