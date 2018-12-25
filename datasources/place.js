@@ -57,7 +57,7 @@ class PlaceAPI extends RESTDataSource {
     return await this.db.tag.find();
   }
 
-  async getRestaurants() {
+  async getRestaurants(first) {
     return await this.db.restaurant.find().sort('-rating').limit(first).populate('tags');
   }
 
