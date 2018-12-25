@@ -136,5 +136,3 @@ async function reviewsNumberCrawler() {
   const fs = require('fs');
   fs.writeFile('./restaurant_data.json', JSON.stringify(restaurantData), 'utf8', function () { console.log('success!'); });
 }
-
-main();
