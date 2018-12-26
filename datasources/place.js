@@ -97,14 +97,15 @@ class PlaceAPI extends RESTDataSource {
   }
 
   getDistance(location, info) {
-    var lat, lng;
-    info.operation.selectionSet.selections[0].arguments.forEach(arg => {
-      if (arg.name.value === 'lat')
-        lat = arg.value.value
-      if (arg.name.value === 'lng')
-        lng = arg.value.value
-    });
-    return calDistance(location.lat, location.lng, lat, lng);
+    // var lat, lng;
+    // info.operation.selectionSet.selections[0].arguments.forEach(arg => {
+    //   console.log(arg.value)
+    //   if (arg.name.value === 'lat')
+    //     lat = arg.value.value
+    //   if (arg.name.value === 'lng')
+    //     lng = arg.value.value
+    // });
+    return calDistance(location.lat, location.lng, info.variableValues.lat, info.variableValues.lng);
   }
 }
 
