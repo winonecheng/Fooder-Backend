@@ -9,7 +9,7 @@ const resolvers = {
     reviews: async (r, _, { dataSources }) => dataSources.placeAPI.getReviews(r.placeId),
     isOpenNow: async (r, _, { dataSources }) => dataSources.placeAPI.isOpen(r.placeId),
     photoUrls: async (r, _, { dataSources }) => dataSources.placeAPI.getPhotoUrls(r.placeId),
-    distance: (r, _, __, info) => dataSources.placeAPI.getDistance(r.location, info),
+    distance: (r, _, { dataSources }, info) => dataSources.placeAPI.getDistance(r.location, info),
   }
 };
 
