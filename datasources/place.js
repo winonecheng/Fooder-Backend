@@ -77,6 +77,7 @@ class PlaceAPI extends RESTDataSource {
           $match: {
             occasions: tagIds[0],
             tags: { $in: tagIds.slice(1) },
+            reviewCount: { $gt: 10 }
           }
         },
         {
