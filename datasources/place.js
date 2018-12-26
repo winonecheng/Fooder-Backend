@@ -2,6 +2,8 @@ const { RESTDataSource } = require('apollo-datasource-rest');
 
 const fetch = require("node-fetch");
 
+const { calDistance } = require('../utils');
+
 class PlaceAPI extends RESTDataSource {
   constructor(db) {
     super();
@@ -86,12 +88,22 @@ class PlaceAPI extends RESTDataSource {
             }
           }
         },
-        { $sort: { 'commonTagCount': -1 , 'rating': -1} },
+        { $sort: { 'commonTagCount': -1, 'rating': -1 , 'reviewCount': -1} },
         { $limit: first },
       ]
     );
-
     return await this.db.tag.populate(r, { path: 'tags' });
+  }
+
+  getDistance(location, info) {
+    var lat, lng;
+    info.operation.selectionSet.selections[0].arguments.forEach(arg => {
+      if (arg.name.value === 'lat')
+        lat = arg.value.value
+      if (arg.name.value === 'lng')
+        lng = arg.value.value
+    });
+    return calDistance(location.lat, location.lng, lat, lng);
   }
 }
 

@@ -34,12 +34,13 @@ const typeDefs = gql`
     photoUrls: [String]
     isOpenNow: Boolean
     openingHours: [String]
+    distance: Float
   }
 
   type Query {
     tags: [Tag]
     restaurants(first: Int): [Restaurant]
-    searchRestaurants(tagIds: [ID], first: Int): [Restaurant]
+    searchRestaurants(lat: Float!, lng: Float!, tagIds: [ID]!, first: Int): [Restaurant]
     getRestaurantByPlaceId(placeId: String): Restaurant
   }
 `;
