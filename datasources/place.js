@@ -48,7 +48,7 @@ class PlaceAPI extends RESTDataSource {
       placeid: placeid,
     }).then(res => res.result.photos);
 
-    const photoLimit = 6;
+    const photoLimit = 5;
     return photos ?
       await Promise.all(photos.slice(0, photoLimit).map(async photo => await fetch(
         `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`
