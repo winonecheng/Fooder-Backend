@@ -50,7 +50,7 @@ class PlaceAPI extends RESTDataSource {
 
     const photoLimit = 7;
     return photos ?
-      await Promise.all(photos.slice(0,photoLimit).map(async photo => await fetch(
+      await Promise.all(photos.slice(0, photoLimit).map(async photo => await fetch(
         `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`
       ).then(res => res.url)
       )) : [];
@@ -72,6 +72,16 @@ class PlaceAPI extends RESTDataSource {
     const ObjectId = require('mongoose').Types.ObjectId;
     tagIds = tagIds.map(tagId => ObjectId(tagId));
 
+    if (tagIds.length === 1) {
+      return await this.db.restaurant.find({
+        occasions: tagIds[0],
+        reviewCount: { $gt: 10 }
+      })
+        .sort({ rating: -1, reviewCount: -1 })
+        .limit(first)
+        .populate('tags');
+    }
+
     const r = await this.db.restaurant.aggregate(
       [
         {
@@ -90,7 +100,7 @@ class PlaceAPI extends RESTDataSource {
             }
           }
         },
-        { $sort: { 'commonTagCount': -1, 'rating': -1 , 'reviewCount': -1} },
+        { $sort: { 'commonTagCount': -1, 'rating': -1, 'reviewCount': -1 } },
         { $limit: first },
       ]
     );
@@ -98,14 +108,6 @@ class PlaceAPI extends RESTDataSource {
   }
 
   getDistance(location, info) {
-    // var lat, lng;
-    // info.operation.selectionSet.selections[0].arguments.forEach(arg => {
-    //   console.log(arg.value)
-    //   if (arg.name.value === 'lat')
-    //     lat = arg.value.value
-    //   if (arg.name.value === 'lng')
-    //     lng = arg.value.value
-    // });
     return calDistance(location.lat, location.lng, info.variableValues.lat, info.variableValues.lng);
   }
 }
