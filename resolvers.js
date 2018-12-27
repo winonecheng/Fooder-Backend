@@ -10,6 +10,7 @@ const resolvers = {
     isOpenNow: async (r, _, { dataSources }) => dataSources.placeAPI.isOpen(r.placeId),
     photoUrls: async (r, _, { dataSources }) => dataSources.placeAPI.getPhotoUrls(r.placeId),
     distance: (r, _, { dataSources }, info) => dataSources.placeAPI.getDistance(r.location, info),
+    id: (r) => r._id.toString(),
   }
 };
 
