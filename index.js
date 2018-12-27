@@ -21,12 +21,11 @@ const server = new ApolloServer({
   dataSources,
   context: () => {
     return {
-      apiKey: 'AIzaSyAglSfq8l-Ko6eK1s-IRFe3H0ib2tGA_f8',
+      apiKey: 'AIzaSyAdXyt70-ESrNFLKhduncw6C-TJv4oXUdo',
     };
   },
-
-  introspection: true,
-  playground: true,
+  introspection: process.env.NODE_ENV === 'production' ? false : true,
+  playground: process.env.NODE_ENV === 'production' ? false : true,
   formatError: error => {
     console.log(error);
     return error;
