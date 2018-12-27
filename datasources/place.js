@@ -42,13 +42,17 @@ class PlaceAPI extends RESTDataSource {
     return data.status === 'OK' && data.result !== {} && data.result.opening_hours ? data.result.opening_hours.open_now : null;
   }
 
-  async getPhotoUrls(placeid) {
+  async getPhotoUrls(placeid, photoUrls) {
+    const photoLimit = 5;
+    if (photoUrls && photoUrls.length >= photoLimit) {
+      return photoUrls.slice(0, 5);
+    }
+
     const photos = await this.get('details/json', {
       fields: 'photo',
       placeid: placeid,
     }).then(res => res.result.photos);
 
-    const photoLimit = 5;
     return photos ?
       await Promise.all(photos.slice(0, photoLimit).map(async photo => await fetch(
         `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`

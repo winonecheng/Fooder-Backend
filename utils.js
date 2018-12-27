@@ -21,6 +21,7 @@ module.exports.connectDB = () => {
     tags: [{ type: 'ObjectId', ref: 'Tag' }],
     openingHours: [String],
     reviewCount: Number,
+    photoUrls: [String],
   });
 
   const TagSchema = new mongoose.Schema({
