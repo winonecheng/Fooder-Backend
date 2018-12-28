@@ -31,7 +31,7 @@ class PlaceAPI extends RESTDataSource {
       fields: 'review',
       placeid: placeid,
     });
-    return data.status === 'OK' && data.result !== {} ? data.result.reviews.map(r => this.reviewReducer(r)) : [];
+    return data.status === 'OK' && Object.keys(data.result).length ? data.result.reviews.map(r => this.reviewReducer(r)) : [];
   }
 
   async isOpen(placeid) {
@@ -39,7 +39,7 @@ class PlaceAPI extends RESTDataSource {
       fields: 'opening_hours/open_now',
       placeid: placeid,
     });
-    return data.status === 'OK' && data.result !== {} && data.result.opening_hours ? data.result.opening_hours.open_now : null;
+    return data.status === 'OK' && Object.keys(data.result).length ? data.result.opening_hours.open_now : null;
   }
 
   async getPhotoUrls(placeid, photoUrls) {
@@ -50,13 +50,19 @@ class PlaceAPI extends RESTDataSource {
     const photos = await this.get('details/json', {
       fields: 'photo',
       placeid: placeid,
-    }).then(res => res.result.photos);
+    })
+      .then(res => res.result.photos)
+      .catch(err => console.error(err));
 
     return photos ?
-      await Promise.all(photos.slice(0, photoLimit).map(async photo => await fetch(
-        `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`
-      ).then(res => res.url)
-      )) : [];
+      await Promise.all(photos.slice(0, photoLimit).map(
+        async photo => await fetch(
+          `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`
+        )
+          .then(res => res.url)
+          .catch(err => console.error(err))
+      ))
+      : [];
   }
 
   async getTags() {
@@ -73,12 +79,14 @@ class PlaceAPI extends RESTDataSource {
 
   async searchRestaurants(tagIds, first) {
     const ObjectId = require('mongoose').Types.ObjectId;
+    const reviewCountLimit = 10;
+
     tagIds = tagIds.map(tagId => ObjectId(tagId));
 
     if (tagIds.length === 1) {
       return await this.db.restaurant.find({
         occasions: tagIds[0],
-        reviewCount: { $gt: 10 }
+        reviewCount: { $gt: reviewCountLimit }
       })
         .sort({ rating: -1, reviewCount: -1 })
         .limit(first)
@@ -91,7 +99,7 @@ class PlaceAPI extends RESTDataSource {
           $match: {
             occasions: tagIds[0],
             tags: { $in: tagIds.slice(1) },
-            reviewCount: { $gt: 10 }
+            reviewCount: { $gt: reviewCountLimit }
           }
         },
         {
