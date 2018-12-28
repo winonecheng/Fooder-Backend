@@ -44,9 +44,8 @@ class PlaceAPI extends RESTDataSource {
 
   async getPhotoUrls(placeid, photoUrls) {
     const photoLimit = 5;
-    if (photoUrls && photoUrls.length >= photoLimit) {
+    if (photoUrls && photoUrls.length >= photoLimit)
       return photoUrls.slice(0, 5);
-    }
 
     const photos = await this.get('details/json', {
       fields: 'photo',

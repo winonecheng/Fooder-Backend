@@ -4,10 +4,7 @@ const mongoose = require('mongoose');
 const fetch = require("node-fetch");
 const ObjectId = mongoose.Types.ObjectId;
 
-const db_url = process.env.NODE_ENV === 'production' ?
-  process.env.MONGODB_URI :
-  'mongodb://127.0.0.1:27017/restaurant'
-const db = mongoose.connect(db_url, { useNewUrlParser: true });
+const db = mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
 const RestaurantSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -143,7 +140,7 @@ async function reviewsNumberCrawler() {
 
 async function getPhotoUrls(placeid) {
   const baseURL = 'https://maps.googleapis.com/maps/api/place';
-  const key = 'AIzaSyAdXyt70-ESrNFLKhduncw6C-TJv4oXUdo'
+  const key = 'AIzaSyAglSfq8l-Ko6eK1s-IRFe3H0ib2tGA_f8'
   const photos = await fetch(
     `${baseURL}/details/json?placeid=${placeid}&key=${key}&language=zh-TW&fields=photo`
   ).then(res => res.json()

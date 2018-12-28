@@ -1,7 +1,8 @@
+require('dotenv').config()
+
 const { ApolloServer } = require('apollo-server');
 
 const PlaceAPI = require('./datasources/place');
-
 const typeDefs = require('./schema');
 const resolvers = require('./resolvers');
 const { connectDB } = require('./utils');
@@ -21,11 +22,9 @@ const server = new ApolloServer({
   dataSources,
   context: () => {
     return {
-      apiKey: 'AIzaSyAdXyt70-ESrNFLKhduncw6C-TJv4oXUdo',
+      apiKey: process.env.GOOGLE_APIKEY,
     };
   },
-  introspection: process.env.NODE_ENV === 'production' ? false : true,
-  playground: process.env.NODE_ENV === 'production' ? false : true,
   formatError: error => {
     console.log(error);
     return error;

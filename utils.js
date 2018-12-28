@@ -1,10 +1,7 @@
 const mongoose = require('mongoose');
 
 module.exports.connectDB = () => {
-  const db_url = process.env.NODE_ENV === 'production' ?
-    process.env.MONGODB_URI :
-    'mongodb://127.0.0.1:27017/restaurant'
-  const db = mongoose.connect(db_url, { useNewUrlParser: true });
+  const db = mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
   const RestaurantSchema = new mongoose.Schema({
     name: { type: String, required: true },
