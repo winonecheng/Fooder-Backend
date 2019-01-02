@@ -51,7 +51,7 @@ class PlaceAPI extends RESTDataSource {
       fields: 'photo',
       placeid: placeid,
     })
-      .then(res => res.result.photos)
+      .then(res => res.result ? res.result.photos : null)
       .catch(err => console.error(err));
 
     return photos ?
