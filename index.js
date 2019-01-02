@@ -16,9 +16,6 @@ const dataSources = () => ({
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  engine: {
-    apiKey: "service:fooder-backend:BS33OMfO-W-cSUqzKtQXjw",
-  },
   dataSources,
   context: () => {
     return {
