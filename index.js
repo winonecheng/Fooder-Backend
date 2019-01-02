@@ -1,5 +1,7 @@
 require('dotenv').config()
 
+const logger = require('heroku-logger')
+
 const { ApolloServer } = require('apollo-server');
 
 const PlaceAPI = require('./datasources/place');
@@ -23,12 +25,8 @@ const server = new ApolloServer({
     };
   },
   formatError: error => {
-    console.log(error);
+    logger.error(error.message, {value: error});
     return error;
-  },
-  formatResponse: response => {
-    console.log(response);
-    return response;
   },
 });
 

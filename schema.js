@@ -1,6 +1,10 @@
 const { gql } = require('apollo-server');
 
 const typeDefs = gql`
+  type User {
+    id: ID
+  }
+
   type Tag {
     id: ID
     text: String
@@ -38,10 +42,11 @@ const typeDefs = gql`
   }
 
   type Query {
+    appEntry(user: ID): User
     tags: [Tag]
     restaurants(first: Int): [Restaurant]
-    searchRestaurants(lat: Float!, lng: Float!, tagIds: [ID]!, first: Int): [Restaurant]
-    getRestaurantByPlaceId(placeId: String): Restaurant
+    searchRestaurants(lat: Float!, lng: Float!, tagIds: [ID]!, first: Int, user: ID): [Restaurant]
+    getRestaurantByPlaceId(placeId: String, user: ID): Restaurant
   }
 `;
 

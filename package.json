@@ -16,6 +16,7 @@
     "apollo-server-express": "^2.2.6",
     "dotenv": "^6.2.0",
     "graphql": "^14.0.2",
+    "heroku-logger": "^0.3.3",
     "lodash": "^4.17.11",
     "mongoose": "^5.3.16",
     "node-fetch": "^2.3.0"
