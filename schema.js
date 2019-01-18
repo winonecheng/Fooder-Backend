@@ -2,17 +2,17 @@ const { gql } = require('apollo-server');
 
 const typeDefs = gql`
   type User {
-    id: ID
+    id: ID!
   }
 
   type Tag {
-    id: ID
-    text: String
+    id: ID!
+    text: String!
   }
 
   type Location {
-    lat: Float
-    lng: Float
+    lat: Float!
+    lng: Float!
     address: String
   }
 
@@ -25,7 +25,7 @@ const typeDefs = gql`
   }
 
   type Restaurant {
-    id: ID,
+    id: ID
     name: String
     placeId: String
     rating: Float
@@ -41,11 +41,27 @@ const typeDefs = gql`
     distance: Float
   }
 
+  type RestaurantConnection {
+    cursor: String
+    hasMore: Boolean!
+    restaurants: [Restaurant]
+  }
+
   type Query {
-    appEntry(user: ID): User
-    tags: [Tag]
-    restaurants(first: Int): [Restaurant]
-    searchRestaurants(lat: Float!, lng: Float!, tagIds: [ID]!, first: Int, user: ID): [Restaurant]
+    appEntry(user: ID): User!
+    tags: [Tag]!
+    restaurants(
+      pageSize: Int
+      after: String
+      ): RestaurantConnection!
+    searchRestaurants(
+      lat: Float!
+      lng: Float!
+      tagIds: [ID]!
+      pageSize: Int
+      after: String
+      user: ID
+      ): RestaurantConnection!
     getRestaurantByPlaceId(placeId: String, user: ID): Restaurant
   }
 `;

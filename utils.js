@@ -31,11 +31,10 @@ module.exports.connectDB = () => {
 };
 
 module.exports.calDistance = (lat1, lng1, lat2, lng2) => {
-  function deg2rad(deg) {
-    return deg * (Math.PI / 180)
-  }
+  const deg2rad = (deg) => deg * (Math.PI / 180);
 
   if (lat1 === lat2 && lng1 === lng2) return 0;
+
   var R = 6371;
   var dLat = deg2rad(lat2 - lat1);
   var dLon = deg2rad(lng2 - lng1);
@@ -48,3 +47,26 @@ module.exports.calDistance = (lat1, lng1, lat2, lng2) => {
   var d = R * c;
   return d;
 }
+
+module.exports.paginateResults = ({
+  after: cursor,
+  pageSize = 20,
+  results,
+}) => {
+  if (pageSize < 1) return [];
+
+  if (!cursor) return results.slice(0, pageSize);
+
+  const cursorIndex = results.findIndex(
+    item => item.id === cursor
+  );
+
+  return cursorIndex >= 0
+    ? cursorIndex === results.length - 1
+      ? []
+      : results.slice(
+        cursorIndex + 1,
+        Math.min(results.length, cursorIndex + 1 + pageSize),
+      )
+    : results.slice(0, pageSize);
+};

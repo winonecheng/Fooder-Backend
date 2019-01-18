@@ -69,15 +69,15 @@ class PlaceAPI extends RESTDataSource {
     return await this.db.tag.find();
   }
 
-  async getRestaurants(first) {
-    return await this.db.restaurant.find().sort('-rating').limit(first).populate('tags');
+  async getRestaurants() {
+    return await this.db.restaurant.find().sort('-rating').populate('tags');
   }
 
   async getRestaurant(placeid) {
     return await this.db.restaurant.findOne({ placeId: placeid }).populate('tags');
   }
 
-  async searchRestaurants(tagIds, first) {
+  async searchRestaurants(tagIds) {
     const ObjectId = require('mongoose').Types.ObjectId;
     const reviewCountLimit = 10;
 
@@ -89,7 +89,6 @@ class PlaceAPI extends RESTDataSource {
         reviewCount: { $gt: reviewCountLimit }
       })
         .sort({ rating: -1, reviewCount: -1 })
-        .limit(first)
         .populate('tags');
     }
 
@@ -104,6 +103,7 @@ class PlaceAPI extends RESTDataSource {
         },
         {
           $addFields: {
+            'id': { "$toString": "$_id" },
             'commonTagCount': {
               $size: {
                 $setIntersection: ['$tags', tagIds.slice(1)]
@@ -112,9 +112,9 @@ class PlaceAPI extends RESTDataSource {
           }
         },
         { $sort: { 'commonTagCount': -1, 'rating': -1, 'reviewCount': -1 } },
-        { $limit: first },
       ]
     );
+
     return await this.db.tag.populate(r, { path: 'tags' });
   }
 
