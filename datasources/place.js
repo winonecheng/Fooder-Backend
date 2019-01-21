@@ -44,9 +44,10 @@ class PlaceAPI extends RESTDataSource {
 
   async getPhotoUrls(placeid, photoUrls) {
     const photoLimit = 5;
-    if (photoUrls && photoUrls.length >= photoLimit)
+    if (photoUrls)
       return photoUrls.slice(0, 5);
 
+    /*
     const photos = await this.get('details/json', {
       fields: 'photo',
       placeid: placeid,
@@ -63,6 +64,7 @@ class PlaceAPI extends RESTDataSource {
           .catch(err => console.error(err))
       ))
       : [];
+    */
   }
 
   async getTags() {
@@ -114,7 +116,6 @@ class PlaceAPI extends RESTDataSource {
         { $sort: { 'commonTagCount': -1, 'rating': -1, 'reviewCount': -1 } },
       ]
     );
-
     return await this.db.tag.populate(r, { path: 'tags' });
   }
 
