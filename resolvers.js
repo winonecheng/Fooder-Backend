@@ -6,10 +6,12 @@ const { paginateResults } = require('./utils');
 const resolvers = {
   Query: {
     appEntry: (_, { user }) => {
-      if (!user) user = crypto.randomBytes(20).toString('hex')
+      if (!user)
+        user = crypto.randomBytes(20).toString('hex')
       logger.info('Open app', { action: 'entry', user: user });
-      return { id: user }
+      return { id: user };
     },
+
     tags: async (_, __, { dataSources }) => dataSources.placeAPI.getTags(),
 
     restaurants: async (_, { pageSize = 10, after, user }, { dataSources }) => {
@@ -34,10 +36,10 @@ const resolvers = {
       }
     },
 
-    searchRestaurants: async (_, { tagIds, pageSize = 10, after, user }, { dataSources }) => {
+    searchRestaurants: async (_, { lat, lng, tagIds, orderBy, pageSize = 10, after, user }, { dataSources }) => {
       logger.info('Search restaurants', { action: 'search', tags: tagIds, after: after, user: user });
-      const allRestaurants = await dataSources.placeAPI.searchRestaurants(tagIds);
 
+      const allRestaurants = await dataSources.placeAPI.searchRestaurants(tagIds, lat, lng, orderBy);
       const restaurants = paginateResults({
         after,
         pageSize,
@@ -65,7 +67,6 @@ const resolvers = {
     reviews: async (r, _, { dataSources }) => dataSources.placeAPI.getReviews(r.placeId),
     isOpenNow: async (r, _, { dataSources }) => dataSources.placeAPI.isOpen(r.placeId),
     photoUrls: async (r, _, { dataSources }) => dataSources.placeAPI.getPhotoUrls(r.placeId, r.photoUrls),
-    distance: (r, _, { dataSources }, info) => dataSources.placeAPI.getDistance(r.location, info),
   }
 };
 

@@ -1,5 +1,6 @@
 const { RESTDataSource } = require('apollo-datasource-rest');
 
+const ObjectId = require('mongoose').Types.ObjectId;
 const fetch = require("node-fetch");
 
 const { calDistance } = require('../utils');
@@ -43,7 +44,6 @@ class PlaceAPI extends RESTDataSource {
   }
 
   async getPhotoUrls(placeid, photoUrls) {
-    const photoLimit = 5;
     if (photoUrls)
       return photoUrls.slice(0, 5);
 
@@ -79,28 +79,31 @@ class PlaceAPI extends RESTDataSource {
     return await this.db.restaurant.findOne({ placeId: placeid }).populate('tags');
   }
 
-  async searchRestaurants(tagIds) {
-    const ObjectId = require('mongoose').Types.ObjectId;
-    const reviewCountLimit = 10;
-
+  async searchRestaurants(tagIds, lat, lng, orderBy) {
     tagIds = tagIds.map(tagId => ObjectId(tagId));
 
-    if (tagIds.length === 1) {
-      return await this.db.restaurant.find({
-        occasions: tagIds[0],
-        reviewCount: { $gt: reviewCountLimit }
-      })
-        .sort({ rating: -1, reviewCount: -1 })
-        .populate('tags');
-    }
+    const minReviewCount = 10;
+    const sortParams = orderBy === 'distance' ?
+    { 'commonTagCount': -1 } :
+    { 'commonTagCount': -1, 'rating': -1, 'reviewCount': -1 };
 
     const r = await this.db.restaurant.aggregate(
       [
         {
+          $geoNear: {
+            near: [lng, lat],
+            distanceField: "distance",
+            distanceMultiplier: 6371,    // radius of the Earth
+            num: 10000,     // should lager than collections count
+            spherical: true,
+            key: "location",
+          }
+        },
+        {
           $match: {
             occasions: tagIds[0],
-            tags: { $in: tagIds.slice(1) },
-            reviewCount: { $gt: reviewCountLimit }
+            // tags: { $in: tagIds.slice(1) },
+            reviewCount: { $gt: minReviewCount }
           }
         },
         {
@@ -113,14 +116,11 @@ class PlaceAPI extends RESTDataSource {
             }
           }
         },
-        { $sort: { 'commonTagCount': -1, 'rating': -1, 'reviewCount': -1 } },
+        { $sort: sortParams },
       ]
-    );
-    return await this.db.tag.populate(r, { path: 'tags' });
-  }
+    )
 
-  getDistance(location, info) {
-    return calDistance(location.lat, location.lng, info.variableValues.lat, info.variableValues.lng);
+    return await this.db.tag.populate(r, { path: 'tags' });
   }
 }
 

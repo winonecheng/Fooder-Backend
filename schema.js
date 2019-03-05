@@ -1,6 +1,11 @@
 const { gql } = require('apollo-server');
 
 const typeDefs = gql`
+  enum AllowedOrder {
+    default
+    distance
+  }
+
   type User {
     id: ID!
   }
@@ -11,9 +16,9 @@ const typeDefs = gql`
   }
 
   type Location {
-    lat: Float!
-    lng: Float!
-    address: String
+    type: String!
+    coordinates: [Float]!
+    address: String!
   }
 
   type Review {
@@ -58,6 +63,7 @@ const typeDefs = gql`
       lat: Float!
       lng: Float!
       tagIds: [ID]!
+      orderBy: AllowedOrder
       pageSize: Int
       after: String
       user: ID
