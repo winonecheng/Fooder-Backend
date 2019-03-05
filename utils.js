@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 module.exports.connectDB = () => {
-  const db = mongoose.connect(process.env.MONGODB_US_URI, { useNewUrlParser: true });
+  const db = mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
   const RestaurantSchema = new mongoose.Schema({
     name: { type: String, required: true },
