@@ -16,7 +16,7 @@ const resolvers = {
 
     restaurants: async (_, { pageSize = 10, after, user }, { dataSources }) => {
       logger.info('Get all restaurants', { action: 'get', after: after, user: user });
-      const allRestaurants = await dataSources.placeAPI.getRestaurants();
+      const allRestaurants = await dataSources.placeAPI.allRestaurants();
 
       const restaurants = paginateResults({
         after,
@@ -58,9 +58,9 @@ const resolvers = {
       }
     },
 
-    getRestaurantByPlaceId: async (_, { placeId, user }, { dataSources }) => {
-      logger.info('Get restaurant', { action: 'get', place: placeId, user: user });
-      return dataSources.placeAPI.getRestaurant(placeId);
+    getRestaurantsByPlaceId: async (_, { placeIds, user }, { dataSources }) => {
+      logger.info('Get restaurants', { action: 'get', place: placeIds, user: user });
+      return dataSources.placeAPI.getRestaurants(placeIds);
     },
   },
   Restaurant: {

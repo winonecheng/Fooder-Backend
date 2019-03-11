@@ -27,30 +27,30 @@ class PlaceAPI extends RESTDataSource {
     };
   }
 
-  async getReviews(placeid) {
+  async getReviews(placeId) {
     const data = await this.get('details/json', {
       fields: 'review',
-      placeid: placeid,
+      placeid: placeId,
     });
     return data.status === 'OK' && Object.keys(data.result).length ? data.result.reviews.map(r => this.reviewReducer(r)) : [];
   }
 
-  async isOpen(placeid) {
+  async isOpen(placeId) {
     const data = await this.get('details/json', {
       fields: 'opening_hours/open_now',
-      placeid: placeid,
+      placeid: placeId,
     });
     return data.status === 'OK' && Object.keys(data.result).length ? data.result.opening_hours.open_now : null;
   }
 
-  async getPhotoUrls(placeid, photoUrls) {
+  async getPhotoUrls(placeId, photoUrls) {
     if (photoUrls)
       return photoUrls.slice(0, 5);
 
     /*
     const photos = await this.get('details/json', {
       fields: 'photo',
-      placeid: placeid,
+      placeid: placeId,
     })
       .then(res => res.result ? res.result.photos : null)
       .catch(err => console.error(err));
@@ -71,12 +71,12 @@ class PlaceAPI extends RESTDataSource {
     return await this.db.tag.find();
   }
 
-  async getRestaurants() {
+  async allRestaurants() {
     return await this.db.restaurant.find().sort('-rating').populate('tags');
   }
 
-  async getRestaurant(placeid) {
-    return await this.db.restaurant.findOne({ placeId: placeid }).populate('tags');
+  async getRestaurants(placeIds) {
+    return await this.db.restaurant.find({ placeId: { $in: placeIds }}).populate('tags');
   }
 
   async searchRestaurants(tagIds, lat, lng, orderBy) {

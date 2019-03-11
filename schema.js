@@ -68,7 +68,7 @@ const typeDefs = gql`
       after: String
       user: ID
       ): RestaurantConnection!
-    getRestaurantByPlaceId(placeId: String, user: ID): Restaurant
+    getRestaurantsByPlaceId(placeIds: [String]!, user: ID): [Restaurant]
   }
 `;
 
