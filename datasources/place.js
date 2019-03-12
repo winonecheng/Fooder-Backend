@@ -102,7 +102,6 @@ class PlaceAPI extends RESTDataSource {
         {
           $match: {
             occasions: tagIds[0],
-            // tags: { $in: tagIds.slice(1) },
             reviewCount: { $gt: minReviewCount }
           }
         },
@@ -118,7 +117,7 @@ class PlaceAPI extends RESTDataSource {
         },
         { $sort: sortParams },
       ]
-    )
+    );
 
     return await this.db.tag.populate(r, { path: 'tags' });
   }

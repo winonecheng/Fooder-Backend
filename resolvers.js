@@ -33,7 +33,7 @@ const resolvers = {
           ? restaurants[restaurants.length - 1].id !==
             allRestaurants[allRestaurants.length - 1].id
           : false,
-      }
+      };
     },
 
     searchRestaurants: async (_, { lat, lng, tagIds, orderBy, pageSize = 10, after, user }, { dataSources }) => {
@@ -55,7 +55,7 @@ const resolvers = {
           ? restaurants[restaurants.length - 1].id !==
             allRestaurants[allRestaurants.length - 1].id
           : false,
-      }
+      };
     },
 
     getRestaurantsByPlaceId: async (_, { placeIds, user }, { dataSources }) => {
