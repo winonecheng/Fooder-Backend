@@ -36,10 +36,10 @@ const resolvers = {
       };
     },
 
-    searchRestaurants: async (_, { lat, lng, tagIds, orderBy, pageSize = 10, after, user }, { dataSources }) => {
+    searchRestaurants: async (_, { lat, lng, tagIds, orderBy, priceLevel, pageSize = 10, after, user }, { dataSources }) => {
       logger.info('Search restaurants', { action: 'search', tags: tagIds, after: after, user: user });
 
-      const allRestaurants = await dataSources.placeAPI.searchRestaurants(tagIds, lat, lng, orderBy);
+      const allRestaurants = await dataSources.placeAPI.searchRestaurants(tagIds, lat, lng, orderBy, priceLevel);
       const restaurants = paginateResults({
         after,
         pageSize,

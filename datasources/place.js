@@ -3,7 +3,7 @@ const { RESTDataSource } = require('apollo-datasource-rest');
 const ObjectId = require('mongoose').Types.ObjectId;
 const fetch = require("node-fetch");
 
-const { calDistance } = require('../utils');
+const { calDistance, formatPrice } = require('../utils');
 
 class PlaceAPI extends RESTDataSource {
   constructor(db) {
@@ -79,13 +79,19 @@ class PlaceAPI extends RESTDataSource {
     return await this.db.restaurant.find({ placeId: { $in: placeIds }}).populate('tags');
   }
 
-  async searchRestaurants(tagIds, lat, lng, orderBy) {
+  async searchRestaurants(tagIds, lat, lng, orderBy, priceLevel) {
     tagIds = tagIds.map(tagId => ObjectId(tagId));
 
     const minReviewCount = 10;
-    const sortParams = orderBy === 'distance' ?
+    const sort = orderBy === 'distance' ?
     { 'commonTagCount': -1 } :
     { 'commonTagCount': -1, 'rating': -1, 'reviewCount': -1 };
+    var match = {
+      occasions: tagIds[0],
+      reviewCount: { $gt: minReviewCount },
+    };
+    if (priceLevel)
+      match['priceLevel']= { $in: formatPrice(priceLevel) };
 
     const r = await this.db.restaurant.aggregate(
       [
@@ -99,12 +105,7 @@ class PlaceAPI extends RESTDataSource {
             key: "location",
           }
         },
-        {
-          $match: {
-            occasions: tagIds[0],
-            reviewCount: { $gt: minReviewCount }
-          }
-        },
+        { $match: match },
         {
           $addFields: {
             'id': { "$toString": "$_id" },
@@ -115,7 +116,7 @@ class PlaceAPI extends RESTDataSource {
             }
           }
         },
-        { $sort: sortParams },
+        { $sort: sort },
       ]
     );
 

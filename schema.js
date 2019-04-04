@@ -64,6 +64,7 @@ const typeDefs = gql`
       lng: Float!
       tagIds: [ID]!
       orderBy: AllowedOrder
+      priceLevel: Int
       pageSize: Int
       after: String
       user: ID
