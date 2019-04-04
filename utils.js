@@ -59,3 +59,16 @@ module.exports.paginateResults = ({
       )
     : results.slice(0, pageSize);
 };
+
+module.exports.formatPrice = (price) => {
+  if (price === 1)
+    return ["0-100"];
+  else if (price === 2)
+    return ["100-200"];
+  else if (price === 3)
+    return ["200-300", "100-300"];
+  else if (price === 4)
+    return ["300↑", "300-400", "200-400", "100-400"];
+  else
+    return "";
+}

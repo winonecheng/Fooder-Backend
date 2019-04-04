@@ -3,7 +3,7 @@ const { RESTDataSource } = require('apollo-datasource-rest');
 const ObjectId = require('mongoose').Types.ObjectId;
 const fetch = require("node-fetch");
 
-const { calDistance, formatPrice } = require('../utils');
+const { formatPrice } = require('../utils');
 
 class PlaceAPI extends RESTDataSource {
   constructor(db) {
