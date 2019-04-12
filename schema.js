@@ -69,7 +69,12 @@ const typeDefs = gql`
       after: String
       user: ID
       ): RestaurantConnection!
-    getRestaurantsByPlaceId(placeIds: [String]!, user: ID): [Restaurant]
+    getRestaurantsByPlaceId(
+      placeIds: [String]!
+      lat: Float!
+      lng: Float!
+      user: ID
+      ): [Restaurant]
   }
 `;
 

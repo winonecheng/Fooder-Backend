@@ -58,9 +58,9 @@ const resolvers = {
       };
     },
 
-    getRestaurantsByPlaceId: async (_, { placeIds, user }, { dataSources }) => {
+    getRestaurantsByPlaceId: async (_, { placeIds, lat, lng, user }, { dataSources }) => {
       logger.info('Get restaurants', { action: 'get', place: placeIds, user: user });
-      return dataSources.placeAPI.getRestaurants(placeIds);
+      return dataSources.placeAPI.getRestaurants(placeIds, lat, lng);
     },
   },
   Restaurant: {

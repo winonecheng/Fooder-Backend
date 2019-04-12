@@ -10,6 +10,14 @@ class PlaceAPI extends RESTDataSource {
     super();
     this.db = db;
     this.baseURL = 'https://maps.googleapis.com/maps/api/place';
+    this.geoNear = {
+      near: null,
+      distanceField: "distance",
+      distanceMultiplier: 6371,    // radius of the Earth
+      num: 10000,     // should lager than collections count
+      spherical: true,
+      key: "location",
+    };
   }
 
   willSendRequest(request) {
@@ -46,25 +54,6 @@ class PlaceAPI extends RESTDataSource {
   async getPhotoUrls(placeId, photoUrls) {
     if (photoUrls)
       return photoUrls.slice(0, 5);
-
-    /*
-    const photos = await this.get('details/json', {
-      fields: 'photo',
-      placeid: placeId,
-    })
-      .then(res => res.result ? res.result.photos : null)
-      .catch(err => console.error(err));
-
-    return photos ?
-      await Promise.all(photos.slice(0, photoLimit).map(
-        async photo => await fetch(
-          `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`
-        )
-          .then(res => res.url)
-          .catch(err => console.error(err))
-      ))
-      : [];
-    */
   }
 
   async getTags() {
@@ -72,11 +61,20 @@ class PlaceAPI extends RESTDataSource {
   }
 
   async allRestaurants() {
-    return await this.db.restaurant.find().sort('-rating').populate('tags');
+    return await this.db.restaurant.find().populate('tags');
   }
 
-  async getRestaurants(placeIds) {
-    return await this.db.restaurant.find({ placeId: { $in: placeIds }}).populate('tags');
+  async getRestaurants(placeIds, lat, lng) {
+    this.geoNear.near = [lng, lat];
+    const r = await this.db.restaurant.aggregate(
+      [
+        { $geoNear: this.geoNear },
+        { $match: { placeId: { $in: placeIds }}},
+        { $addFields: {'id': { "$toString": "$_id" }}}
+      ]
+    );
+
+    return await this.db.tag.populate(r, { path: 'tags' })
   }
 
   async searchRestaurants(tagIds, lat, lng, orderBy, priceLevel) {
@@ -93,27 +91,16 @@ class PlaceAPI extends RESTDataSource {
     if (priceLevel)
       match['priceLevel']= { $in: formatPrice(priceLevel) };
 
+    this.geoNear.near = [lng, lat];
+
     const r = await this.db.restaurant.aggregate(
       [
-        {
-          $geoNear: {
-            near: [lng, lat],
-            distanceField: "distance",
-            distanceMultiplier: 6371,    // radius of the Earth
-            num: 10000,     // should lager than collections count
-            spherical: true,
-            key: "location",
-          }
-        },
+        { $geoNear: this.geoNear },
         { $match: match },
         {
           $addFields: {
             'id': { "$toString": "$_id" },
-            'commonTagCount': {
-              $size: {
-                $setIntersection: ['$tags', tagIds.slice(1)]
-              }
-            }
+            'commonTagCount': { $size: { $setIntersection: ['$tags', tagIds.slice(1)]}}
           }
         },
         { $sort: sort },
