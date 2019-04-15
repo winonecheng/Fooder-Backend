@@ -24,20 +24,20 @@ const typeDefs = gql`
   type Review {
     authorName: String
     authorPhotoUrl: String
-    relativeTime: String
-    rating: Int
-    text: String
+    relativeTime: String!
+    rating: Int!
+    text: String!
   }
 
   type Restaurant {
-    id: ID
-    name: String
-    placeId: String
+    id: ID!
+    name: String!
+    placeId: String!
     rating: Float
     priceLevel: String
     phoneNumber: String
-    tags: [Tag]
-    location: Location
+    tags: [Tag]!
+    location: Location!
     reviews: [Review]
     reviewCount: Int
     photoUrls: [String]
@@ -69,6 +69,10 @@ const typeDefs = gql`
       after: String
       user: ID
       ): RestaurantConnection!
+    getRestaurantByPlaceId(
+      placeId: String!
+      user: ID
+      ): Restaurant
     getRestaurantsByPlaceId(
       placeIds: [String]!
       lat: Float!

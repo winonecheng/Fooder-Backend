@@ -62,6 +62,11 @@ const resolvers = {
       logger.info('Get restaurants', { action: 'get', place: placeIds, user: user });
       return dataSources.placeAPI.getRestaurants(placeIds, lat, lng);
     },
+
+    getRestaurantByPlaceId: async (_, { placeId, user }, { dataSources }) => {
+      logger.info('Get restaurant', { action: 'get', place: placeId, user: user });
+      return dataSources.placeAPI.getRestaurant(placeId);
+    }
   },
   Restaurant: {
     reviews: async (r, _, { dataSources }) => dataSources.placeAPI.getReviews(r.placeId),

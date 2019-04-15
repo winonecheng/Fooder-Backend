@@ -64,6 +64,10 @@ class PlaceAPI extends RESTDataSource {
     return await this.db.restaurant.find().populate('tags');
   }
 
+  async getRestaurant(placeId) {
+    return await this.db.restaurant.findOne({ placeId: placeId }).populate('tags');
+  }
+
   async getRestaurants(placeIds, lat, lng) {
     this.geoNear.near = [lng, lat];
     const r = await this.db.restaurant.aggregate(
@@ -74,7 +78,7 @@ class PlaceAPI extends RESTDataSource {
       ]
     );
 
-    return await this.db.tag.populate(r, { path: 'tags' })
+    return await this.db.tag.populate(r, { path: 'tags' });
   }
 
   async searchRestaurants(tagIds, lat, lng, orderBy, priceLevel) {
