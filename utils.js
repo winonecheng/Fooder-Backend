@@ -10,8 +10,15 @@ module.exports.connectDB = () => {
     priceLevel: String,
     phoneNumber: String,
     location: {
-      lat: Number,
-      lng: Number,
+      type: {
+        type: String,
+        enum: ['Point'],
+        required: true
+      },
+      coordinates: {
+        type: [Number],
+        required: true
+      },
       address: String,
     },
     occasions: [{ type: 'ObjectId', ref: 'Tag' }],
@@ -29,24 +36,6 @@ module.exports.connectDB = () => {
   const tag = mongoose.model('Tag', TagSchema);
   return { restaurant, tag };
 };
-
-module.exports.calDistance = (lat1, lng1, lat2, lng2) => {
-  const deg2rad = (deg) => deg * (Math.PI / 180);
-
-  if (lat1 === lat2 && lng1 === lng2) return 0;
-
-  var R = 6371;
-  var dLat = deg2rad(lat2 - lat1);
-  var dLon = deg2rad(lng2 - lng1);
-  var a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    ;
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  var d = R * c;
-  return d;
-}
 
 module.exports.paginateResults = ({
   after: cursor,
@@ -70,3 +59,16 @@ module.exports.paginateResults = ({
       )
     : results.slice(0, pageSize);
 };
+
+module.exports.formatPrice = (price) => {
+  if (price === 1)
+    return ["0-100"];
+  else if (price === 2)
+    return ["100-200"];
+  else if (price === 3)
+    return ["200-300", "100-300"];
+  else if (price === 4)
+    return ["300↑", "300-400", "200-400", "100-400"];
+  else
+    return "";
+}

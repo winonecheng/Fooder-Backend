@@ -1,14 +1,23 @@
 const { RESTDataSource } = require('apollo-datasource-rest');
 
+const ObjectId = require('mongoose').Types.ObjectId;
 const fetch = require("node-fetch");
 
-const { calDistance } = require('../utils');
+const { formatPrice } = require('../utils');
 
 class PlaceAPI extends RESTDataSource {
   constructor(db) {
     super();
     this.db = db;
     this.baseURL = 'https://maps.googleapis.com/maps/api/place';
+    this.geoNear = {
+      near: null,
+      distanceField: "distance",
+      distanceMultiplier: 6371,    // radius of the Earth
+      num: 10000,     // should lager than collections count
+      spherical: true,
+      key: "location",
+    };
   }
 
   willSendRequest(request) {
@@ -26,101 +35,83 @@ class PlaceAPI extends RESTDataSource {
     };
   }
 
-  async getReviews(placeid) {
+  async getReviews(placeId) {
     const data = await this.get('details/json', {
       fields: 'review',
-      placeid: placeid,
+      placeid: placeId,
     });
     return data.status === 'OK' && Object.keys(data.result).length ? data.result.reviews.map(r => this.reviewReducer(r)) : [];
   }
 
-  async isOpen(placeid) {
+  async isOpen(placeId) {
     const data = await this.get('details/json', {
       fields: 'opening_hours/open_now',
-      placeid: placeid,
+      placeid: placeId,
     });
     return data.status === 'OK' && Object.keys(data.result).length ? data.result.opening_hours.open_now : null;
   }
 
-  async getPhotoUrls(placeid, photoUrls) {
-    const photoLimit = 5;
+  async getPhotoUrls(placeId, photoUrls) {
     if (photoUrls)
       return photoUrls.slice(0, 5);
-
-    /*
-    const photos = await this.get('details/json', {
-      fields: 'photo',
-      placeid: placeid,
-    })
-      .then(res => res.result ? res.result.photos : null)
-      .catch(err => console.error(err));
-
-    return photos ?
-      await Promise.all(photos.slice(0, photoLimit).map(
-        async photo => await fetch(
-          `${this.baseURL}/photo?maxwidth=374&maxheight=213&key=${this.context.apiKey}&photoreference=${photo.photo_reference}`
-        )
-          .then(res => res.url)
-          .catch(err => console.error(err))
-      ))
-      : [];
-    */
   }
 
   async getTags() {
     return await this.db.tag.find();
   }
 
-  async getRestaurants() {
-    return await this.db.restaurant.find().sort('-rating').populate('tags');
+  async allRestaurants() {
+    return await this.db.restaurant.find().populate('tags');
   }
 
-  async getRestaurant(placeid) {
-    return await this.db.restaurant.findOne({ placeId: placeid }).populate('tags');
+  async getRestaurant(placeId) {
+    return await this.db.restaurant.findOne({ placeId: placeId }).populate('tags');
   }
 
-  async searchRestaurants(tagIds) {
-    const ObjectId = require('mongoose').Types.ObjectId;
-    const reviewCountLimit = 10;
-
-    tagIds = tagIds.map(tagId => ObjectId(tagId));
-
-    if (tagIds.length === 1) {
-      return await this.db.restaurant.find({
-        occasions: tagIds[0],
-        reviewCount: { $gt: reviewCountLimit }
-      })
-        .sort({ rating: -1, reviewCount: -1 })
-        .populate('tags');
-    }
-
+  async getRestaurants(placeIds, lat, lng) {
+    this.geoNear.near = [lng, lat];
     const r = await this.db.restaurant.aggregate(
       [
-        {
-          $match: {
-            occasions: tagIds[0],
-            tags: { $in: tagIds.slice(1) },
-            reviewCount: { $gt: reviewCountLimit }
-          }
-        },
-        {
-          $addFields: {
-            'id': { "$toString": "$_id" },
-            'commonTagCount': {
-              $size: {
-                $setIntersection: ['$tags', tagIds.slice(1)]
-              }
-            }
-          }
-        },
-        { $sort: { 'commonTagCount': -1, 'rating': -1, 'reviewCount': -1 } },
+        { $geoNear: this.geoNear },
+        { $match: { placeId: { $in: placeIds }}},
+        { $addFields: {'id': { "$toString": "$_id" }}}
       ]
     );
+
     return await this.db.tag.populate(r, { path: 'tags' });
   }
 
-  getDistance(location, info) {
-    return calDistance(location.lat, location.lng, info.variableValues.lat, info.variableValues.lng);
+  async searchRestaurants(tagIds, lat, lng, orderBy, priceLevel) {
+    tagIds = tagIds.map(tagId => ObjectId(tagId));
+
+    const minReviewCount = 10;
+    const sort = orderBy === 'distance' ?
+    { 'commonTagCount': -1 } :
+    { 'commonTagCount': -1, 'rating': -1, 'reviewCount': -1 };
+    var match = {
+      occasions: tagIds[0],
+      reviewCount: { $gt: minReviewCount },
+    };
+    if (priceLevel)
+      match['priceLevel']= { $in: formatPrice(priceLevel) };
+
+    this.geoNear.near = [lng, lat];
+
+    const r = await this.db.restaurant.aggregate(
+      [
+        { $geoNear: this.geoNear },
+        { $match: match },
+        {
+          $addFields: {
+            'id': { "$toString": "$_id" },
+            'commonTagCount': { $size: { $setIntersection: ['$tags', tagIds.slice(1)]}}
+          }
+        },
+        { $sort: sort },
+      ]
+    );
+
+    return await this.db.tag.populate(r, { path: 'tags' });
   }
 }
 
