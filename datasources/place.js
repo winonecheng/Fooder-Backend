@@ -14,7 +14,6 @@ class PlaceAPI extends RESTDataSource {
       near: null,
       distanceField: "distance",
       distanceMultiplier: 6371,    // radius of the Earth
-      num: 10000,     // should lager than collections count
       spherical: true,
       key: "location",
     };
