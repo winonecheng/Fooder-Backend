@@ -47,7 +47,7 @@ class PlaceAPI extends RESTDataSource {
       fields: 'opening_hours/open_now',
       placeid: placeId,
     });
-    return data.status === 'OK' && Object.keys(data.result).length ? data.result.opening_hours.open_now : null;
+    return data.status === 'OK' && Object.keys(data.result).length && data.result.opening_hours ? data.result.opening_hours.open_now : null;
   }
 
   async getPhotoUrls(placeId, photoUrls) {
