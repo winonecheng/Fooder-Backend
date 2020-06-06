@@ -13,7 +13,7 @@
   "dependencies": {
     "apollo-datasource-rest": "^0.2.1",
     "apollo-server": "^2.2.6",
-    "apollo-server-express": "^2.2.6",
+    "apollo-server-express": "^2.14.2",
     "dotenv": "^6.2.0",
     "graphql": "^14.0.2",
     "heroku-logger": "^0.3.3",
