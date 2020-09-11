@@ -19,6 +19,6 @@
     "heroku-logger": "^0.3.3",
     "lodash": "^4.17.13",
     "mongoose": "^5.7.5",
-    "node-fetch": "^2.3.0"
+    "node-fetch": "^2.6.1"
   }
 }
